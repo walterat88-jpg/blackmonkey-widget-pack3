@@ -138,6 +138,7 @@
       P + " .bmp-trust span{white-space:nowrap;}",
       P + " .bmp-cierre{text-align:center;font-size:20px;font-weight:800;color:#fff;padding-top:26px;}",
 
+      P + ".bmp-angosto .bmp-cal{grid-template-columns:1fr;}" + P + ".bmp-angosto .bmp-cal-foto{width:auto!important;}",
       "@media (max-width:860px){" + P + " .bmp-grid{grid-template-columns:1fr;}" + P + " .bmp-cal{grid-template-columns:1fr;}" +
         P + " .bmp-cal-foto{width:auto!important;}" +
         P + " .bmp-tabs{position:static;background:none;backdrop-filter:none;padding:0;margin-top:10px;justify-content:flex-start;}" +
@@ -338,10 +339,16 @@
     function ajustarFoto() {
       var wrap = root.querySelector(".bmp-cal-foto");
       var feats = root.querySelector(".bmp-feats");
-      if (!wrap || window.innerWidth <= 860) return;
-      wrap.style.width = Math.max(240, Math.round(feats.offsetHeight)) + "px";
+      if (!wrap) return;
+      var angosto = root.offsetWidth < 760;
+      root.classList.toggle("bmp-angosto", angosto);
+      if (angosto) { wrap.style.width = ""; return; }
+      // varias pasadas: al cambiar el ancho de la foto cambia el alto de la lista
+      for (var n = 0; n < 4; n++) wrap.style.width = Math.max(240, Math.round(feats.offsetHeight)) + "px";
     }
     ajustarFoto();
+    setTimeout(ajustarFoto, 400);
+    setTimeout(ajustarFoto, 1500);   // por si la tipografía carga tarde
     window.addEventListener("resize", ajustarFoto);
     var det = root.querySelector(".bmp-det");
     if (det) det.addEventListener("load", ajustarFoto);
@@ -353,6 +360,9 @@
     var root = document.getElementById(ID);
     if (!root || root.getAttribute("data-listo")) return;
     root.setAttribute("data-listo", "1");
+    // El tema pone el contenido de las páginas en una columna angosta: la ensanchamos solo en esta página
+    var col = root.closest('[class*="col-md-"],[class*="col-lg-"]');
+    if (col) { col.style.flex = "0 0 100%"; col.style.maxWidth = "100%"; }
     estilos();
     render(root);
   }
